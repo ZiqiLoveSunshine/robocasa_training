@@ -1,3 +1,4 @@
 /__pycache__
 /runs/
-/robocasa/datasets
+/robocasa/datasets/
+/wandb/
