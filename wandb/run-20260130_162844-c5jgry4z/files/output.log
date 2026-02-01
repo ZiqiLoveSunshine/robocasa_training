@@ -1,0 +1,28 @@
+Starting VISUAL training on PnPCounterToCab with 1 environments...
+  0%|                               | 165/500000 [00:08<7:07:06, 19.50it/s]
+Traceback (most recent call last):
+  File "/home/ziqi/robocasa_traning/train.py", line 392, in <module>
+    trainer.train()
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/sequential.py", line 77, in train
+    super().train()
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/base.py", line 216, in train
+    next_observations, rewards, terminated, truncated, infos = self.env.step(actions)
+  File "/home/ziqi/robocasa_traning/skrl/skrl/envs/wrappers/torch/gymnasium_envs.py", line 71, in step
+    observation, reward, terminated, truncated, info = self._env.step(actions)
+  File "/home/ziqi/robocasa_traning/train.py", line 202, in step
+    ret = self.env.step(action)
+  File "/home/ziqi/robosuite/robosuite/environments/base.py", line 459, in step
+    self._pre_action(action, policy_step)
+  File "/home/ziqi/robosuite/robosuite/environments/robot_env.py", line 589, in _pre_action
+    robot.control(robot_action, policy_step=policy_step)
+  File "/home/ziqi/robosuite/robosuite/robots/wheeled_robot.py", line 123, in control
+    applied_action_dict = self.composite_controller.run_controller(self._enabled_parts)
+  File "/home/ziqi/robosuite/robosuite/controllers/composite/composite_controller.py", line 114, in run_controller
+    self._applied_action_dict[part_name] = controller.run_controller()
+  File "/home/ziqi/robosuite/robosuite/controllers/parts/mobile_base/joint_vel.py", line 251, in run_controller
+    ctrl_range = np.stack([self.actuator_min, self.actuator_max], axis=-1)
+  File "<__array_function__ internals>", line 180, in stack
+  File "/home/ziqi/anaconda3/envs/robocasa/lib/python3.10/site-packages/numpy/core/shape_base.py", line 433, in stack
+    return _nx.concatenate(expanded_arrays, axis=axis, out=out)
+  File "<__array_function__ internals>", line 180, in concatenate
+KeyboardInterrupt

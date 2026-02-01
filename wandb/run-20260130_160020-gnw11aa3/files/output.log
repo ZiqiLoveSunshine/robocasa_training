@@ -1,0 +1,18 @@
+Starting VISUAL training on PnPCounterToCab with 1 environments...
+  1%| | 3151/500000 [02:03
+Traceback (most recent call last):
+  File "/home/ziqi/robocasa_traning/train.py", line 385, in <module>
+    trainer.train()
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/sequential.py", line 77, in train
+    super().train()
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/base.py", line 216, in train
+    next_observations, rewards, terminated, truncated, infos = self.env.step(actions)
+  File "/home/ziqi/robocasa_traning/skrl/skrl/envs/wrappers/torch/gymnasium_envs.py", line 71, in step
+    observation, reward, terminated, truncated, info = self._env.step(actions)
+  File "/home/ziqi/robocasa_traning/train.py", line 195, in step
+    ret = self.env.step(action)
+  File "/home/ziqi/robosuite/robosuite/environments/base.py", line 456, in step
+    self.sim.step1()
+  File "/home/ziqi/robosuite/robosuite/utils/binding_utils.py", line 1100, in step1
+    mujoco.mj_step1(self.model._model, self.data._data)
+KeyboardInterrupt

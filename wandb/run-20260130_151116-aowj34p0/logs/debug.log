@@ -1,0 +1,47 @@
+2026-01-30 15:11:16,277 INFO    MainThread:211105 [wandb_setup.py:_flush():81] Current SDK version is 0.24.0
+2026-01-30 15:11:16,277 INFO    MainThread:211105 [wandb_setup.py:_flush():81] Configure stats pid to 211105
+2026-01-30 15:11:16,277 INFO    MainThread:211105 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-01-30 15:11:16,277 INFO    MainThread:211105 [wandb_init.py:setup_run_log_directory():717] Logging user logs to /home/philippe/Documents/robocasa_training/wandb/run-20260130_151116-aowj34p0/logs/debug.log
+2026-01-30 15:11:16,277 INFO    MainThread:211105 [wandb_init.py:setup_run_log_directory():718] Logging internal logs to /home/philippe/Documents/robocasa_training/wandb/run-20260130_151116-aowj34p0/logs/debug-internal.log
+2026-01-30 15:11:16,294 INFO    MainThread:211105 [wandb_init.py:init():844] calling init triggers
+2026-01-30 15:11:16,294 INFO    MainThread:211105 [wandb_init.py:init():849] wandb.init called with sweep_config: {}
+config: {'experiment': {'directory': 'runs/robocasa/PnPCounterToCab_visual', 'experiment_name': '', 'write_interval': 200, 'checkpoint_interval': 2000, 'store_separately': False, 'wandb': True, 'wandb_kwargs': {'project': 'robocasa_experiments', 'entity': 'Graph-Mobile-Manipulator', 'name': 'robocasa_PnPCounterToCab', 'monitor_gym': True}}, 'rollouts': 2048, 'learning_epochs': 10, 'mini_batches': 32, 'discount_factor': 0.9, 'lambda_': 0.95, 'learning_rate': (0.0005, 0.0005), 'learning_rate_scheduler': (<class 'skrl.resources.schedulers.torch.kl_adaptive.KLAdaptiveLR'>, <class 'skrl.resources.schedulers.torch.kl_adaptive.KLAdaptiveLR'>), 'learning_rate_scheduler_kwargs': ({'kl_threshold': 0.008}, {'kl_threshold': 0.008}), 'observation_preprocessor': None, 'observation_preprocessor_kwargs': {}, 'state_preprocessor': None, 'state_preprocessor_kwargs': {}, 'value_preprocessor': None, 'value_preprocessor_kwargs': {}, 'random_timesteps': 0, 'learning_starts': 0, 'grad_norm_clip': 0.5, 'ratio_clip': 0.2, 'value_clip': 0.2, 'entropy_loss_scale': 0.0, 'value_loss_scale': 0.5, 'kl_threshold': 0.0, 'time_limit_bootstrap': False, 'rewards_shaper': None, 'mixed_precision': False, 'timesteps': 500000, 'headless': True, 'render_interval': 1, 'disable_progressbar': False, 'close_environment_at_exit': True, 'environment_info': 'episode', 'stochastic_evaluation': False, 'policy': {'0': Linear(in_features=256, out_features=128, bias=True), '1': ReLU(), '2': Linear(in_features=128, out_features=12, bias=True), '3': Tanh()}, 'value': {'0': Linear(in_features=256, out_features=128, bias=True), '1': ReLU(), '2': Linear(in_features=128, out_features=1, bias=True)}, '_wandb': {}}
+2026-01-30 15:11:16,294 INFO    MainThread:211105 [wandb_init.py:init():892] starting backend
+2026-01-30 15:11:16,513 INFO    MainThread:211105 [wandb_init.py:init():895] sending inform_init request
+2026-01-30 15:11:16,519 INFO    MainThread:211105 [wandb_init.py:init():903] backend started and connected
+2026-01-30 15:11:16,521 INFO    MainThread:211105 [wandb_init.py:init():973] updated telemetry
+2026-01-30 15:11:16,521 INFO    MainThread:211105 [wandb_init.py:init():997] communicating run to backend with 90.0 second timeout
+2026-01-30 15:11:17,120 INFO    MainThread:211105 [wandb_init.py:init():1044] starting run threads in backend
+2026-01-30 15:11:17,181 INFO    MainThread:211105 [wandb_run.py:_console_start():2529] atexit reg
+2026-01-30 15:11:17,181 INFO    MainThread:211105 [wandb_run.py:_redirect():2377] redirect: wrap_raw
+2026-01-30 15:11:17,181 INFO    MainThread:211105 [wandb_run.py:_redirect():2446] Wrapping output streams.
+2026-01-30 15:11:17,181 INFO    MainThread:211105 [wandb_run.py:_redirect():2469] Redirects installed.
+2026-01-30 15:11:17,185 INFO    MainThread:211105 [wandb_init.py:init():1084] run started, returning control to user process
+2026-01-30 15:11:17,186 INFO    wandb-AsyncioManager-main:211105 [service_client.py:_forward_responses():80] Reached EOF.
+2026-01-30 15:11:17,187 INFO    wandb-AsyncioManager-main:211105 [mailbox.py:close():137] Closing mailbox, abandoning 1 handles.
+2026-01-30 15:11:18,207 ERROR   wandb-AsyncioManager-main:211105 [asyncio_manager.py:fn_wrap_exceptions():183] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/asyncio_manager.py", line 181, in fn_wrap_exceptions
+    await fn()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/service/service_client.py", line 38, in publish
+    await self._send_server_request(request)
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/service/service_client.py", line 64, in _send_server_request
+    await self._writer.drain()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/asyncio/streams.py", line 371, in drain
+    await self._protocol._drain_helper()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/asyncio/streams.py", line 167, in _drain_helper
+    raise ConnectionResetError('Connection lost')
+ConnectionResetError: Connection lost
+2026-01-30 15:11:18,317 ERROR   wandb-AsyncioManager-main:211105 [asyncio_manager.py:fn_wrap_exceptions():183] Uncaught exception in run_soon callback.
+Traceback (most recent call last):
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/asyncio_manager.py", line 181, in fn_wrap_exceptions
+    await fn()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/service/service_client.py", line 38, in publish
+    await self._send_server_request(request)
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/site-packages/wandb/sdk/lib/service/service_client.py", line 64, in _send_server_request
+    await self._writer.drain()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/asyncio/streams.py", line 371, in drain
+    await self._protocol._drain_helper()
+  File "/home/philippe/anaconda3/envs/robocasa/lib/python3.10/asyncio/streams.py", line 167, in _drain_helper
+    raise ConnectionResetError('Connection lost')
+ConnectionResetError: Connection lost

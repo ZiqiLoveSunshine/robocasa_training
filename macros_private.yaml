@@ -1,0 +1,6 @@
+# wandb entity (eg. username or team name)
+WANDB_ENTITY: "Graph-Mobile-Manipulator"
+
+# wandb api key (obtain from https://wandb.ai/authorize)
+# alternatively, set up wandb from terminal with `wandb login`
+WANDB_API_KEY: "89d5e4ba22c144fcd32b8b818c3e0592913a1a14"

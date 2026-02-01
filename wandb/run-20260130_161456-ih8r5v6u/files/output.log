@@ -1,0 +1,25 @@
+Starting VISUAL training on PnPCounterToCab with 1 environments...
+  3%| | 15863/500000 [11:2
+Traceback (most recent call last):
+  File "/home/ziqi/robocasa_traning/train.py", line 385, in <module>
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/sequential.py", line 77, in train
+    super().train()
+  File "/home/ziqi/robocasa_traning/skrl/skrl/trainers/torch/base.py", line 216, in train
+    next_observations, rewards, terminated, truncated, infos = self.env.step(actions)
+  File "/home/ziqi/robocasa_traning/skrl/skrl/envs/wrappers/torch/gymnasium_envs.py", line 71, in step
+    observation, reward, terminated, truncated, info = self._env.step(actions)
+  File "/home/ziqi/robocasa_traning/train.py", line 195, in step
+    # Clip actions to valid range and check for NaN/Inf to prevent simulation instability
+  File "/home/ziqi/robosuite/robosuite/environments/base.py", line 464, in step
+    self._update_observables()
+  File "/home/ziqi/robosuite/robosuite/environments/base.py", line 387, in _update_observables
+    observable.update(timestep=self.model_timestep, obs_cache=self._obs_cache, force=force)
+  File "/home/ziqi/robosuite/robosuite/utils/observables.py", line 234, in update
+    obs = np.array(self._filter(self._corrupter(self._sensor(obs_cache))))
+  File "/home/ziqi/robosuite/robosuite/environments/robot_env.py", line 413, in camera_rgb
+    img = self.sim.render(
+  File "/home/ziqi/robosuite/robosuite/utils/binding_utils.py", line 1140, in render
+    self._render_context_offscreen.render(
+  File "/home/ziqi/robosuite/robosuite/utils/binding_utils.py", line 159, in render
+    mujoco.mjr_render(viewport=viewport, scn=self.scn, con=self.con)
+KeyboardInterrupt

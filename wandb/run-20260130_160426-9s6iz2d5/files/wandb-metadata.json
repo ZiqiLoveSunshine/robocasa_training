@@ -1,0 +1,21 @@
+{
+  "os":  "Linux-5.15.0-163-generic-x86_64-with-glibc2.35",
+  "python":  "CPython 3.10.19",
+  "startedAt":  "2026-01-30T15:04:26.545719Z",
+  "args":  [
+    "--env_name",
+    "PnPCounterToCab",
+    "--max_timesteps",
+    "500000",
+    "--headless",
+    "--wandb"
+  ],
+  "program":  "/home/ziqi/robocasa_traning/train.py",
+  "codePath":  "train.py",
+  "codePathLocal":  "train.py",
+  "email":  "ziqi_ma0605@163.com",
+  "root":  "/home/ziqi/robocasa_traning",
+  "host":  "truong",
+  "executable":  "/home/ziqi/anaconda3/envs/robocasa/bin/python",
+  "writerId":  "m1mf326x4nyaeyq6lpxd2z7gdcrr8pl6"
+}
