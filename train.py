@@ -1,3 +1,12 @@
+"""
+Training script using the custom PnPCounterToCab environment.
+
+This is a modified version of train.py that uses the custom environment
+from the env/ folder, allowing you to experiment with different reward functions.
+
+Usage:
+    python train_custom.py --env_name PnPCounterToCab --max_timesteps 500000 --num_envs 2
+"""
 
 import sys
 import os
@@ -18,12 +27,9 @@ import robosuite
 from robosuite.controllers import load_composite_controller_config
 from robosuite.wrappers import GymWrapper
 import robocasa
-# Explicitly import the environment module to register tasks
-try:
-    import robocasa.environments.kitchen.single_stage.kitchen_pnp
-except ImportError:
-    pass # If structure is different, we might need to find where it is. But we found it in file search.
 
+# Import custom environment
+from env import CustomPnPCounterToCab
 
 import torch
 import torch.nn as nn
@@ -237,7 +243,6 @@ def create_sim_env(env_name, seed=None, c_heights=128, c_widths=128):
     
     # Environment arguments - ENABLE CAMERAS for Visual RL
     env_kwargs = dict(
-        env_name=env_name,
         robots=robots,
         controller_configs=controller_config,
         has_renderer=False, # Headless training, don't show window
@@ -253,7 +258,9 @@ def create_sim_env(env_name, seed=None, c_heights=128, c_widths=128):
         reward_shaping=True,
     )
 
-    env = robosuite.make(**env_kwargs)
+    # Use custom environment instead of robosuite.make
+    print(f"Creating custom environment: {env_name}")
+    env = CustomPnPCounterToCab(**env_kwargs)
     
     # DO NOT use GymWrapper here because it flattens everything including images.
     # We use our custom RobocasaImageWrapper directly on the base environment.
@@ -265,7 +272,7 @@ def create_sim_env(env_name, seed=None, c_heights=128, c_widths=128):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env_name", type=str, default="PnPCounterToCab", help="Robocasa environment name")
+    parser.add_argument("--env_name", type=str, default="PnPCounterToCab", help="Robocasa environment name (for logging)")
     parser.add_argument("--max_timesteps", type=int, default=100000, help="Total training timesteps")
     parser.add_argument("--num_envs", type=int, default=1, help="Number of parallel environments")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
@@ -356,7 +363,7 @@ if __name__ == '__main__':
     cfg.observation_preprocessor = None 
     
     # Logging
-    cfg.experiment.directory = f"runs/robocasa/{args.env_name}_visual"
+    cfg.experiment.directory = f"runs/robocasa/{args.env_name}_custom_visual"
     cfg.experiment.write_interval = 200
     cfg.experiment.checkpoint_interval = 2000
     
@@ -366,12 +373,10 @@ if __name__ == '__main__':
         cfg.experiment.wandb_kwargs = {
             "project": WANDB_PROJECT,
             "entity": WANDB_ENTITY,
-            "name": f"robocasa_{args.env_name}",
+            "name": f"robocasa_{args.env_name}_custom",
             "monitor_gym": True,
             "sync_tensorboard": True  # Enable tensorboard syncing to wandb
     }
-    # print(env.action_space.low, env.action_space.high)
-    # print(1/0)
 
     agent = PPO(
         models=models,
@@ -388,5 +393,6 @@ if __name__ == '__main__':
     trainer = SequentialTrainer(cfg=cfg_trainer, env=env, agents=agent)
 
     # 7. Train
-    print(f"Starting VISUAL training on {args.env_name} with {args.num_envs} environments...")
+    print(f"Starting VISUAL training on CUSTOM {args.env_name} with {args.num_envs} environments...")
+    print(f"Using custom reward function from env/custom_pnp_counter_to_cab.py")
     trainer.train()
