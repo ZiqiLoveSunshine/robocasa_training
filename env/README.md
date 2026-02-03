@@ -22,7 +22,7 @@ env/
 ### Basic Usage
 
 ```python
-from env import CustomPnPCounterToCab
+from env import MyPnPCounterToCab
 from robosuite.controllers import load_composite_controller_config
 
 # Setup controller
@@ -33,7 +33,7 @@ controller_config = load_composite_controller_config(
 )
 
 # Create custom environment
-env = CustomPnPCounterToCab(
+env = MyPnPCounterToCab(
     robots=robots,
     controller_configs=controller_config,
     has_renderer=False,
@@ -58,29 +58,29 @@ Modify your `train.py` to use the custom environment:
 
 ```python
 # Add this import at the top
-from env import CustomPnPCounterToCab
+from env import MyPnPCounterToCab
 
 # In create_sim_env function, replace:
 # env = robosuite.make(**env_kwargs)
 # with:
-env = CustomPnPCounterToCab(**env_kwargs)
+env = MyPnPCounterToCab(**env_kwargs)
 ```
 
 Or use robosuite.make by passing the class directly:
 
 ```python
 import robosuite
-from env import CustomPnPCounterToCab
+from env import MyPnPCounterToCab
 
 env = robosuite.make(
-    env_class=CustomPnPCounterToCab,  # Use custom class
+    env_class=MyPnPCounterToCab,  # Use custom class
     # ... other arguments
 )
 ```
 
 ## Available Reward Functions
 
-The `CustomPnPCounterToCab` class includes several reward function implementations:
+The `MyPnPCounterToCab` class includes several reward function implementations:
 
 ### 1. `reward()` - Default (Original)
 The standard reward function from RoboCasa:
@@ -225,10 +225,10 @@ To use the custom environment in your training pipeline:
 
 1. **Modify `train.py`**:
    ```python
-   from env import CustomPnPCounterToCab
+   from env import MyPnPCounterToCab
    
    # In create_sim_env function:
-   env = CustomPnPCounterToCab(**env_kwargs)
+   env = MyPnPCounterToCab(**env_kwargs)
    ```
 
 2. **Run training**:
@@ -236,7 +236,7 @@ To use the custom environment in your training pipeline:
    python train.py --env_name PnPCounterToCab --max_timesteps 500000
    ```
 
-The environment name is just for logging; the actual environment used is `CustomPnPCounterToCab`.
+The environment name is just for logging; the actual environment used is `MyPnPCounterToCab`.
 
 ## Tips for Reward Design
 
@@ -286,7 +286,7 @@ Make sure you:
 ### Environment Not Found
 If using `robosuite.make()`, pass the class directly:
 ```python
-env = robosuite.make(env_class=CustomPnPCounterToCab, ...)
+env = robosuite.make(env_class=MyPnPCounterToCab, ...)
 ```
 
 ## Advanced: Multiple Custom Environments

@@ -29,7 +29,7 @@ from robosuite.wrappers import GymWrapper
 import robocasa
 
 # Import custom environment
-from env import CustomPnPCounterToCab
+from env import MyPnPCounterToCab
 
 import torch
 import torch.nn as nn
@@ -260,7 +260,7 @@ def create_sim_env(env_name, seed=None, c_heights=128, c_widths=128):
 
     # Use custom environment instead of robosuite.make
     print(f"Creating custom environment: {env_name}")
-    env = CustomPnPCounterToCab(**env_kwargs)
+    env = MyPnPCounterToCab(**env_kwargs)
     
     # DO NOT use GymWrapper here because it flattens everything including images.
     # We use our custom RobocasaImageWrapper directly on the base environment.
