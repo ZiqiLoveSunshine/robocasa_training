@@ -250,7 +250,9 @@ def create_sim_env(env_name, seed=None, c_heights=128, c_widths=128):
         ignore_done=True,
         use_object_obs=False, # Disable object state obs (Visual RL)
         use_camera_obs=True, # Enable camera obs
-        camera_names=["robot0_agentview_center"], # Primary camera
+        camera_names=["robot0_agentview_center",
+                "robot0_agentview_left",
+                "robot0_agentview_right"], # Primary camera
         camera_heights=c_heights,
         camera_widths=c_widths,
         control_freq=20,
