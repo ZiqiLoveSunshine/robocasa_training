@@ -12,6 +12,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from env import MyPnPCounterToCab
+from env import MyTurnOnMicrowave
 import gymnasium as gym
 import numpy as np
 import robosuite
@@ -22,6 +23,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback, CallbackList
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
 from stable_baselines3.common.env_util import make_vec_env
+from env.fixed_observation_wrapper import FixedObservationWrapper
 import wandb
 from wandb.integration.sb3 import WandbCallback
 
@@ -37,6 +39,8 @@ def make_env(task_name, rank, seed=0, wandb_run=None):
         # Define Environment
         if task_name == "PnPCounterToCab":
             env_cls = MyPnPCounterToCab
+        elif task_name == "TurnOnMicrowave":
+            env_cls = MyTurnOnMicrowave
         else:
              raise ValueError(f"Task {task_name} not supported yet in this script")
 
@@ -56,12 +60,17 @@ def make_env(task_name, rank, seed=0, wandb_run=None):
             renderer="mjviewer",
             render_camera="robot0_robotview", # avoiding 'robot0_agentview_center' error
             ignore_done=False, 
-            horizon=500, 
+            horizon=500,
         )
         
         # Wrap with GymWrapper
-        # Keys=None means use default (proprio + object-state)
+        # NOTE: Using keys=None due to a bug in RoboCasa's GymWrapper where explicit keys
+        # cause observation space to not match actual observations. With keys=None, the
+        # wrapper correctly handles the observation space.
         env = GymWrapper(env, keys=None)
+        
+        # Fix observation space mismatch (RoboCasa bug workaround)
+        # env = FixedObservationWrapper(env)
         
         # Wrap with Monitor for SB3 logging
         log_dir = f"/tmp/gym/{rank}"
@@ -99,12 +108,13 @@ def main():
     )
     
     # Create Vectorized Environment
-    env = make_vec_env(
-        make_env(args.task, 0, args.seed),
-        n_envs=args.n_envs,
-        seed=args.seed,
-        vec_env_cls=SubprocVecEnv if args.n_envs > 1 else DummyVecEnv
-    )
+    # Create a list of environment factories, one for each parallel environment
+    env_fns = [make_env(args.task, i, args.seed) for i in range(args.n_envs)]
+    
+    if args.n_envs > 1:
+        env = SubprocVecEnv(env_fns)
+    else:
+        env = DummyVecEnv(env_fns)
 
     # Define PPO Model
     model = PPO(
@@ -112,11 +122,11 @@ def main():
         env,
         verbose=1,
         tensorboard_log=f"runs/{run_name}",
-        learning_rate=5e-4,
+        learning_rate=3e-4,
         n_steps=2048,
         batch_size=64,
         n_epochs=10,
-        gamma=0.99,
+        gamma=0.9,
         gae_lambda=0.95,
         clip_range=0.2,
         ent_coef=0.0,
@@ -128,7 +138,7 @@ def main():
     checkpoint_callback = CheckpointCallback(
         save_freq=max(100_000 // args.n_envs, 1),
         save_path=os.path.join(args.save_dir, run_name),
-        name_prefix="ppo_robocasa",
+        name_prefix="ppo",
     )
     
     wandb_callback = WandbCallback(

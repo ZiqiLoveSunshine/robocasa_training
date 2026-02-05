@@ -10,27 +10,33 @@ import numpy as np
 import imageio
 from stable_baselines3 import PPO
 from robosuite.wrappers.gym_wrapper import GymWrapper
-
+from robosuite.controllers import load_composite_controller_config
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from env import MyPnPCounterToCab
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", type=str, default="PnPCounterToCab")
-    parser.add_argument("--model-path", type=str, required=True, help="Path to trained model zip")
+    parser.add_argument("--model_path", type=str, required=True, help="Path to trained model zip")
     parser.add_argument("--seed", type=int, default=100)
     parser.add_argument("--episodes", type=int, default=5)
-    parser.add_argument("--save-video", action="store_true", help="Save video of evaluation")
-    parser.add_argument("--video-path", type=str, default="eval_videos", help="Directory to save videos")
-    parser.add_argument("--reward-shaping", action="store_true", help="Enable dense rewards during evaluation")
+    parser.add_argument("--save_video", action="store_true", help="Save video of evaluation")
+    parser.add_argument("--video_path", type=str, default="eval_videos", help="Directory to save videos")
+    parser.add_argument("--reward_shaping", action="store_true", help="Enable dense rewards during evaluation")
     args = parser.parse_args()
 
     # Environment for evaluation (enable renderer if saving video)
     # Note: For video saving we need offscreen renderer
     has_offscreen = args.save_video
     
+    robots = "PandaOmron" # Default robot
+    controller_config = load_composite_controller_config(
+        controller=None,
+        robot=robots,
+    )
     env = MyPnPCounterToCab(
-        robots="Panda",
+        robots=robots,
+        controller_configs=controller_config,
         use_camera_obs=False,
         has_renderer=False,
         has_offscreen_renderer=has_offscreen,

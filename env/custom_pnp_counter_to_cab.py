@@ -36,13 +36,11 @@ import numpy as np
 
 class MyPnPCounterToCab(PnPCounterToCab):
     """
-    My custom PnPCounterToCab environment with modified reward function.
+    PnPCounterToCab environment with modified reward function.
     
     This class inherits from the original PnPCounterToCab and overrides
     the reward() method to implement a custom reward function.
     
-    You can modify the reward function below to experiment with different
-    reward shaping strategies without touching the original robocasa code.
     """
     
     def __init__(self, *args, **kwargs):
@@ -52,37 +50,76 @@ class MyPnPCounterToCab(PnPCounterToCab):
         """
         super().__init__(*args, **kwargs)
         
+        # weights
+        self.W_REACH = 1.0
+        self.W_GRASP = 5.0
+        self.W_LIFT = 1.0
+        self.W_TRANSPORT = 1.0
+        self.W_PLACE = 10.0
+        self.W_SUCCESS = 5.0
+        self.W_ACTION_L2 = 0.01
+
+        # shaping scales
+        self.ALPHA_REACH = 2.0       # exp(-ALPHA * dist)
+        self.ALPHA_TRANSPORT = 2.0
+        self.LIFT_TARGET = 0.08      # meters above counter/table, adjust if needed
+        
     def reward(self, action=None):
-        """
-        Using alternative dense reward with different shaping.
-        """
-        reward = 0.0
-        
+        r = 0.0
+
+        # Positions
         obj_pos = self.sim.data.body_xpos[self.obj_body_id["obj"]]
-        gripper_site_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id["right"]]
-        
-        # Distance-based rewards with different scaling
-        dist_gripper_obj = np.linalg.norm(gripper_site_pos - obj_pos)
-        dist_obj_cab = np.linalg.norm(obj_pos - self.cab.pos)
-        
-        # Exponential decay rewards
-        reward += np.exp(-2.0 * dist_gripper_obj)  # Reach object
-        
-        # Check if grasped
-        is_grasped = self.check_contact(self.objects["obj"], self.robots[0].gripper)
+        ee_pos = self.sim.data.site_xpos[self.robots[0].eef_site_id["right"]]
+        cab_pos = np.array(self.cab.pos, dtype=np.float32)
+
+        # Distances
+        dist_ee_obj = float(np.linalg.norm(ee_pos - obj_pos))
+        dist_obj_cab = float(np.linalg.norm(obj_pos - cab_pos))
+
+        # Stage signals
+        is_grasped = bool(self.check_contact(self.objects["obj"], self.robots[0].gripper))
+        is_inside = bool(OU.obj_inside_of(self, "obj", self.cab))
+        is_success = bool(self._check_success())
+
+        # 1) Reach object (always on)
+        r_reach = np.exp(-self.ALPHA_REACH * dist_ee_obj)
+        r += self.W_REACH * r_reach
+
+        # 2) Grasp bonus (sparse but frequent once learned)
         if is_grasped:
-            reward += 3.0  # Smaller grasp bonus
-            reward += np.exp(-2.0 * dist_obj_cab)  # Only reward moving to cab if grasped
-        
-        # Place bonus
-        if OU.obj_inside_of(self, "obj", self.cab):
-            reward += 10.0  # Larger place bonus
-            
-        # Success bonus
-        if self._check_success():
-            reward += 5.0
-            
-        return reward
+            r += self.W_GRASP
+
+            # 3) Lift shaping (only after grasp)
+            # We encourage lifting a bit to reduce dragging collisions.
+            # Estimate counter height as initial z if available; here we use cab/counter logic indirectly.
+            lift = max(0.0, float(obj_pos[2]) - float(self.table_offset[2]))  # rough baseline
+            r_lift = np.clip(lift / self.LIFT_TARGET, 0.0, 1.0)
+            r += self.W_LIFT * r_lift
+
+            # 4) Transport to cabinet (only after grasp)
+            r_transport = np.exp(-self.ALPHA_TRANSPORT * dist_obj_cab)
+            r += self.W_TRANSPORT * r_transport
+
+        # 5) Place bonus (object inside cabinet volume)
+        if is_inside:
+            r += self.W_PLACE
+
+        # 6) Success bonus
+        if is_success:
+            r += self.W_SUCCESS
+
+        # Penalty: large actions (smoothness)
+        if action is not None:
+            r -= self.W_ACTION_L2 * float(np.sum(np.square(action)))
+
+        # Penalize touching distractor objects
+        if self.check_contact(self.objects["distr_counter"], self.robots[0].gripper):
+            reward -= 0.5
+        if self.check_contact(self.objects["distr_cab"], self.robots[0].gripper):
+            reward -= 0.5
+
+
+        return float(r)
     
     # ============================================================================
     # EXAMPLE ALTERNATIVE REWARD FUNCTIONS

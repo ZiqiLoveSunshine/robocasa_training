@@ -1,6 +1,5 @@
-tensorboard --logdir /home/philippe/Documents/robocasa_training/runs/robocasa/PnPCounterToCab_visual/
+python rl_scripts/train_ppo.py --task PnPCounterToCab --max_timesteps 3000000  --n_envs 8
 
+python rl_scripts/train_ppo.py --task TurnOnMicrowave --max_timesteps 3000000  --n_envs 1
 
-python train.py --env_name PnPCounterToCab --max_timesteps 500000 --headless --num_envs 2
-
-python rl_scripts/train_ppo.py --task PnPCounterToCab --max_timesteps 1000000  --n_envs 2
+python rl_scripts/eval_ppo.py --task PnPCounterToCab --model_path models/PnPCounterToCab_ppo_20260203_111846/final_model --save_video
