@@ -3,4 +3,6 @@
 /wandb/
 /models/
 /eval_videos/
-/help/
+/robocasa/
+/robosuite/
+/_robosuite_local/

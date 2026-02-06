@@ -90,9 +90,10 @@ class MyPnPCounterToCab(PnPCounterToCab):
         
         # Get the base path for robocasa objects
         base_path = os.path.join(robocasa.models.assets_root, "objects", "objaverse")
-        
+        # print("base_path", base_path)
         # Sample object: always apple_1 (using full path to model.xml)
         apple_1_path = os.path.join(base_path, "apple", "apple_1", "model.xml")
+        # print("apple_1_path", apple_1_path)
         cfgs.append(
             dict(
                 name="obj",
