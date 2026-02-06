@@ -13,44 +13,57 @@ from robosuite.wrappers.gym_wrapper import GymWrapper
 from robosuite.controllers import load_composite_controller_config
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from env import MyPnPCounterToCab
+from env import MyPnPCounterToCab, MyTurnOnMicrowave
+from env.fixed_observation_wrapper import FixedObservationWrapper
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--task", type=str, default="PnPCounterToCab")
+    parser.add_argument("--task", type=str, default="PnPCounterToCab", help="Task name: PnPCounterToCab or TurnOnMicrowave")
     parser.add_argument("--model_path", type=str, required=True, help="Path to trained model zip")
-    parser.add_argument("--seed", type=int, default=100)
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--episodes", type=int, default=5)
     parser.add_argument("--save_video", action="store_true", help="Save video of evaluation")
     parser.add_argument("--video_path", type=str, default="eval_videos", help="Directory to save videos")
     parser.add_argument("--reward_shaping", action="store_true", help="Enable dense rewards during evaluation")
     args = parser.parse_args()
 
+    # Select environment class based on task
+    if args.task == "PnPCounterToCab":
+        env_cls = MyPnPCounterToCab
+    elif args.task == "TurnOnMicrowave":
+        env_cls = MyTurnOnMicrowave
+    else:
+        raise ValueError(f"Task {args.task} not supported")
+
     # Environment for evaluation (enable renderer if saving video)
     # Note: For video saving we need offscreen renderer
     has_offscreen = args.save_video
     
-    robots = "PandaOmron" # Default robot
+    robots = "PandaOmron"  # Default robot
     controller_config = load_composite_controller_config(
         controller=None,
         robot=robots,
     )
-    env = MyPnPCounterToCab(
+    env = env_cls(
         robots=robots,
         controller_configs=controller_config,
         use_camera_obs=False,
         has_renderer=False,
         has_offscreen_renderer=has_offscreen,
-        reward_shaping=args.reward_shaping, # Eval on sparse or dense? usually sparse for success rate
+        reward_shaping=args.reward_shaping,  # Eval on sparse or dense? usually sparse for success rate
         control_freq=20,
         ignore_done=False,
         horizon=500,
         camera_names="robot0_eye_in_hand",
         camera_heights=512,
         camera_widths=512,
+        seed=args.seed,
         render_camera="robot0_eye_in_hand",
     )
     
+    # Use same wrapper setup as training
     env = GymWrapper(env, keys=None)
+    env = FixedObservationWrapper(env)
     
     model = PPO.load(args.model_path)
     

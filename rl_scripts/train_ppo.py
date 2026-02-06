@@ -27,7 +27,7 @@ from env.fixed_observation_wrapper import FixedObservationWrapper
 import wandb
 from wandb.integration.sb3 import WandbCallback
 
-def make_env(task_name, rank, seed=0, wandb_run=None):
+def make_env(args, rank):
     """
     Utility function for multiprocessed env.
     
@@ -37,29 +37,36 @@ def make_env(task_name, rank, seed=0, wandb_run=None):
     """
     def _init():
         # Define Environment
-        if task_name == "PnPCounterToCab":
+        if args.task == "PnPCounterToCab":
             env_cls = MyPnPCounterToCab
-        elif task_name == "TurnOnMicrowave":
+        elif args.task == "TurnOnMicrowave":
             env_cls = MyTurnOnMicrowave
         else:
-             raise ValueError(f"Task {task_name} not supported yet in this script")
+             raise ValueError(f"Task {args.task} not supported yet in this script")
 
         robots = "PandaOmron" # Default robot
         controller_config = load_composite_controller_config(
             controller=None,
             robot=robots,
         )
+        layout_and_style_ids = [[1, 1]]
+        if args.headless:
+            has_renderer = False
+        else:
+            has_renderer = True
         env = env_cls(
             robots=robots,
             controller_configs=controller_config,
+            layout_and_style_ids=layout_and_style_ids,
             use_camera_obs=False, 
-            has_renderer=False, 
+            has_renderer=has_renderer, 
             has_offscreen_renderer=False,
             reward_shaping=True, 
             control_freq=20,
             renderer="mjviewer",
             render_camera="robot0_robotview", # avoiding 'robot0_agentview_center' error
-            ignore_done=False, 
+            ignore_done=False,
+            seed=args.seed, 
             horizon=500,
         )
         
@@ -77,7 +84,7 @@ def make_env(task_name, rank, seed=0, wandb_run=None):
         os.makedirs(log_dir, exist_ok=True)
         env = Monitor(env, log_dir)
         
-        env.reset(seed=seed + rank)
+        env.reset(seed=args.seed)
         return env
     return _init
 
@@ -91,6 +98,7 @@ def main():
     parser.add_argument("--save_dir", type=str, default="./models", help="Directory to save models")
     parser.add_argument("--run_name", type=str, default=None, help="Run name")
     parser.add_argument("--n_envs", type=int, default=1, help="Number of parallel environments")
+    parser.add_argument("--headless", action="store_true", help="Run in headless mode")
     
     args = parser.parse_args()
     
@@ -109,7 +117,7 @@ def main():
     
     # Create Vectorized Environment
     # Create a list of environment factories, one for each parallel environment
-    env_fns = [make_env(args.task, i, args.seed) for i in range(args.n_envs)]
+    env_fns = [make_env(args, i) for i in range(args.n_envs)]
     
     if args.n_envs > 1:
         env = SubprocVecEnv(env_fns)
