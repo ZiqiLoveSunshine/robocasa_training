@@ -49,7 +49,6 @@ def make_env(args, rank):
             controller=None,
             robot=robots,
         )
-        layout_and_style_ids = [[1, 1]]
         if args.headless:
             has_renderer = False
         else:
@@ -57,14 +56,13 @@ def make_env(args, rank):
         env = env_cls(
             robots=robots,
             controller_configs=controller_config,
-            layout_and_style_ids=layout_and_style_ids,
             use_camera_obs=False, 
             has_renderer=has_renderer, 
             has_offscreen_renderer=False,
             reward_shaping=True, 
             control_freq=20,
             renderer="mjviewer",
-            render_camera="robot0_robotview", # avoiding 'robot0_agentview_center' error
+            # render_camera="robot0_robotview", # avoiding 'robot0_agentview_center' error
             ignore_done=False,
             seed=args.seed, 
             horizon=500,

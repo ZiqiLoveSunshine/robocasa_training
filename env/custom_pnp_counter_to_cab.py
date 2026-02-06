@@ -47,7 +47,20 @@ class MyPnPCounterToCab(PnPCounterToCab):
         """
         Initialize the custom environment.
         All arguments are passed to the parent PnPCounterToCab class.
+        
+        This environment fixes the kitchen layout to a single configuration
+        while allowing object positions to vary.
         """
+        # Fix the kitchen layout to layout 0, style 0 (you can change these values)
+        # This prevents the kitchen configuration from changing between episodes
+        if 'layout_ids' not in kwargs:
+            kwargs['layout_ids'] = [1]  # Use layout 1
+        if 'style_ids' not in kwargs:
+            kwargs['style_ids'] = [1]   # Use style 1
+            
+        # Capture the seed if provided
+        self.custom_seed = kwargs.get('seed', 0)
+        
         super().__init__(*args, **kwargs)
         
         # weights
@@ -63,6 +76,95 @@ class MyPnPCounterToCab(PnPCounterToCab):
         self.ALPHA_REACH = 2.0       # exp(-ALPHA * dist)
         self.ALPHA_TRANSPORT = 2.0
         self.LIFT_TARGET = 0.08      # meters above counter/table, adjust if needed
+    
+    def _get_obj_cfgs(self):
+        """
+        Override to set specific objects:
+        - Sample object (obj): always apple_1
+        - Distractor objects: always bowl_1
+        """
+        import os
+        import robocasa
+        
+        cfgs = []
+        
+        # Get the base path for robocasa objects
+        base_path = os.path.join(robocasa.models.assets_root, "objects", "objaverse")
+        
+        # Sample object: always apple_1 (using full path to model.xml)
+        apple_1_path = os.path.join(base_path, "apple", "apple_1", "model.xml")
+        cfgs.append(
+            dict(
+                name="obj",
+                obj_groups=apple_1_path,  # Force apple_1 as the sample object
+                graspable=True,
+                placement=dict(
+                    fixture=self.counter,
+                    sample_region_kwargs=dict(
+                        ref=self.cab,
+                    ),
+                    size=(0.60, 0.30),
+                    pos=(0.0, -1.0),
+                    offset=(0.0, 0.10),
+                ),
+            )
+        )
+
+        # Distractor on counter: always bowl_1 (using full path to model.xml)
+        bowl_1_path = os.path.join(base_path, "bowl", "bowl_1", "model.xml")
+        cfgs.append(
+            dict(
+                name="distr_counter",
+                obj_groups=bowl_1_path,  # Force bowl_1 as distractor
+                placement=dict(
+                    fixture=self.counter,
+                    sample_region_kwargs=dict(
+                        ref=self.cab,
+                    ),
+                    size=(1.0, 0.30),
+                    pos=(0.0, 1.0),
+                    offset=(0.0, -0.05),
+                ),
+            )
+        )
+
+        return cfgs
+        
+    def _get_placement_initializer(self, cfg_list, z_offset=0.01):
+        """
+        Override to enforce deterministic placement for fixtures (appliances),
+        while allowing random placement for objects.
+        """
+        sampler = super()._get_placement_initializer(cfg_list, z_offset)
+        
+        # Check if this sampler is for fixtures (appliances)
+        # Fixture configs usually have type="fixture"
+        is_fixture_placement = False
+        if cfg_list and len(cfg_list) > 0:
+            if cfg_list[0].get("type") == "fixture":
+                is_fixture_placement = True
+        
+        if is_fixture_placement:
+            # Use the environment seed for fixture placement to ensure deterministic behavior
+            # appliances will stay in place throughout the run (assuming constant seed for env)
+            # but will change if you change the training run seed.
+            
+            # Retrieve the seed captured in __init__
+            seed_val = getattr(self, "custom_seed", 0)
+            if seed_val is None:
+                seed_val = 0
+                
+            fixed_rng = np.random.default_rng(seed=seed_val)
+            
+            # Set the RNG for the main sampler
+            sampler.rng = fixed_rng
+            
+            # Set the RNG for all sub-samplers
+            if hasattr(sampler, "samplers"):
+                for sub_sampler in sampler.samplers.values():
+                    sub_sampler.rng = fixed_rng
+                    
+        return sampler
         
     def reward(self, action=None):
         r = 0.0
@@ -114,10 +216,7 @@ class MyPnPCounterToCab(PnPCounterToCab):
 
         # Penalize touching distractor objects
         if self.check_contact(self.objects["distr_counter"], self.robots[0].gripper):
-            reward -= 0.5
-        if self.check_contact(self.objects["distr_cab"], self.robots[0].gripper):
-            reward -= 0.5
-
+            r -= 0.5
 
         return float(r)
     
